@@ -7,6 +7,9 @@ I have recently obtained [ddRAD-seq](http://journals.plos.org/plosone/article?id
 The directory structure is as follows:
 
 'analyses'  - Files resulting from analyses.
+
 'data' -  Information and links to methods and raw data.
+
 'notebooks'	- Jupyter notebooks.
+
 'scripts' - Scripts such as R scripts used for analyses.
