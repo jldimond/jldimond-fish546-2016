@@ -4,8 +4,8 @@ data1_all                          ## [0] [assembly_name]: Assembly name. Used t
                               ## [2] [raw_fastq_path]: Location of raw non-demultiplexed fastq files
                                ## [3] [barcodes_path]: Location of barcodes file
 /Volumes/toaster/jdimond/jldimond-fish546-2016/analyses/ipyrad_analysis/data1_all_fastqs/*.fastq.gz                               ## [4] [sorted_fastq_path]: Location of demultiplexed/sorted fastq files
-reference                         ## [5] [assembly_method]: Assembly method (denovo, reference, denovo+reference, denovo-reference)
-/Volumes/toaster/jdimond/pastreoides_may2014_transcriptome/past.fasta                               ## [6] [reference_sequence]: Location of reference sequence file
+denovo-reference                         ## [5] [assembly_method]: Assembly method (denovo, reference, denovo+reference, denovo-reference)
+/Volumes/toaster/jdimond/jldimond-fish546-2016/data/SymBF_genome.fa                               ## [6] [reference_sequence]: Location of reference sequence file
 pairddrad                            ## [7] [datatype]: Datatype (see docs): rad, gbs, ddrad, etc.
 TGCAG, NGG                        ## [8] [restriction_overhang]: Restriction overhang (cut1,) or (cut1, cut2)
 5                              ## [9] [max_low_qual_bases]: Max low quality base calls (Q<20) in a read
