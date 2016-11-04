@@ -4,7 +4,7 @@ This is a repository for my 2016 FISH 546 project, involving analysis of _Porite
 
 I have recently obtained [ddRAD-seq](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0037135) and [EpiRAD-seq](http://onlinelibrary.wiley.com/doi/10.1111/2041-210X.12435/abstract) data for 48 samples of _Porites_ spp. corals collected in Belize. Most of these samples consist of branching _Porites_ spp., for which there is taxonomic uncertainty whether these comprise 3 different species or a single polymorphic species. The species are identitied primarily by branch thickness.
 
-![_Porites porites_](./images/123.jpg =100x20) ![_Porites furcata_](https://github.com/jldimond/jldimond-fish546-2016/blob/master/images/117.jpg =100x20) ![_Porites divaricata_](https://github.com/jldimond/jldimond-fish546-2016/blob/master/images/120.jpg =100x20) 
+![_Porites porites_](./images/Screen%20Shot%202016-11-03%20at%206.56.27%20PM.png)
 
 My goal is to evaluate (1) if there is any genetic structuring of these individuals using the ddRAD data and (2) if there is any epigenetic structuring of these individuals using the EpiRAD data. I will be using iPyrad to obtain the clusters of loci, and will be filtering out symbiont sequences by using the "denovo-reference" option to obtain sequences that do not match the _Symbiodinium minutum_ and _Symbiodinium kawagutii_ genomes.
 
