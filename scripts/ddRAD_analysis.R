@@ -34,8 +34,10 @@ a4 <- a3[,c(1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47,4
 a5 <- a4[!rowSums(a4[-c(1:2)] == 9) >= 1,]
 
 #Read in sample info
-sinfo <- read.table("sample_info.txt", colClasses = 'character', header = FALSE)
+sinfo <- read.table("data3_sample_info.txt", colClasses = 'character', header = FALSE)
 tsinfo <- t(sinfo)
+#create vectors for morphotype and diameter (note whether sample 101
+#was included or not)
 type <- tsinfo[3,]
 diam <- tsinfo[5,]
 

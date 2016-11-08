@@ -30,3 +30,7 @@
 *.sma
 
 *.phy
+
+*.vcf
+
+data3.txt

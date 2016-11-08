@@ -1,9 +1,10 @@
+##################################################################
 ## This script reads in a text file derived from the "Base Counts"
 ## .vcf output from ipyrad. Base counts are used for analysis of 
 ## EpiRADseq data.
 
 # Read in data file
-data <- read.delim("~/snpEff/data3-2.txt", header=FALSE)
+data <- read.delim("data3-2.txt", header=FALSE)
 # Since the base counts were split into four columns, these need 
 # to be summed
 data2 <- t(sapply(seq(4,ncol(data), by=4), function(i) {
@@ -12,7 +13,7 @@ data2 <- t(sapply(seq(4,ncol(data), by=4), function(i) {
 #The resulting file needs to be transposed and turned into a dataframe
 data3 <- as.data.frame(t(data2))
 #Add header names
-header <- read.delim("~/snpEff/header_data3.txt", header=FALSE)
+header <- read.delim("header_data3.txt", header=FALSE)
 names <- as.vector(t(header))
 colnames(data3) <- names
 #Select samples of interest (some have very low sample sizes)
@@ -32,10 +33,12 @@ data5 <- data4[apply(data4[c(1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,
                              31,33,35,37,39,41,43,45,47,49,51)],1,
                      function(z) !any(z==0)),] 
 
+
 #We may want to look at a matrix with only EpiRAd data
 data6 <- data5[,c(2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,
                   38,40,42,44,46,48,50,52)]
 
+#################################################################
 # Now use edgeR package to standardize count data by library size
 
 library("edgeR")
@@ -69,6 +72,7 @@ for (i in seq(1,51, by = 2)){
        ylab= colnames(counts2_cpm[,i+1]))
 }
 
+##################################################################
 #Using lm to get residuals
 
 lm103 <- lm(counts2_cpm[,2] ~ counts2_cpm[,1])
@@ -152,8 +156,39 @@ y <- fit$points[,2]
 plot(x, y)
 text(x, y, labels = row.names(resid_t), col = rainbow(length(diam2))[rank(diam2)], cex=.7)
 
+########################################################
+#PCA
+pca <- prcomp(resid_t)
+summary(pca)
+eig <- (pca$sdev)^2
 
-#make binary based on residuals <=-1
+#plot
+biplot(pca)
+
+# Correlation between variables and principal components
+var_cor_func <- function(var.loadings, comp.sdev){
+  var.loadings*comp.sdev
+}
+# Variable correlation/coordinates
+loadings <- pca$rotation
+sdev <- pca$sdev
+var.coord <- var.cor <- t(apply(loadings, 1, var_cor_func, sdev))
+head(var.coord[, 1:4])
+
+# Plot the correlation circle
+a <- seq(0, 2*pi, length = 100)
+plot( cos(a), sin(a), type = 'l', col="gray",
+      xlab = "PC1",  ylab = "PC2")
+abline(h = 0, v = 0, lty = 2)
+# Add active variables
+arrows(0, 0, var.coord[, 1], var.coord[, 2], 
+       length = 0.1, angle = 15, code = 2)
+# Add labels
+text(var.coord, labels=rownames(var.coord), cex = 1, adj=1)
+
+#################################################################
+#Make binary dataset based on residuals <=-1
+
 resid_all_binary <- ifelse(resid_all<=-1, 1, 0)
 
 #proportion of methylated cutsites
@@ -169,3 +204,48 @@ y <- fit$points[,2]
 plot(x, y, xlab="Coordinate 1", ylab="Coordinate 2", 
      main="Metric  MDS",  type="n")
 text(x, y, labels = row.names(resid_t_binary), cex=.7)
+
+####################################################################
+#DESeq2 analysis of differentially methylated loci
+#NOTE: this does not seem to return useful information (it is skewed
+#towards high count data, though maybe this could be dealt with)
+
+library(DESeq2)
+# Specify which columns are in which groups
+sinfo <- read.delim("data3_sample_info.txt", header=FALSE)
+deseq2.colData <- data.frame(condition=factor(sinfo[2:27,3]), 
+                             type=factor(rep("paired-end", 26)))
+rownames(deseq2.colData) <- colnames(data5)
+deseq2.dds <- DESeqDataSetFromMatrix(countData = data5,
+                                     colData = deseq2.colData, 
+                                     design = ~ condition)
+# Run Analysis
+deseq2.dds <- DESeq(deseq2.dds)
+deseq2.res <- results(deseq2.dds)
+deseq2.res <- deseq2.res[order(rownames(deseq2.res)), ]
+
+head(deseq2.res)
+
+# Count number of hits with adjusted p-value less then 0.05
+dim(deseq2.res[!is.na(deseq2.res$padj) & deseq2.res$padj <= 0.05, ])
+
+tmp <- deseq2.res
+# The main plot
+plot(tmp$baseMean, tmp$log2FoldChange, pch=20, cex=0.45, ylim=c(-3, 3), log="x", col="darkgray",
+     main="Diff. methylyated loci  (pval <= 0.05)",
+     xlab="mean of normalized counts",
+     ylab="Log2 Fold Change")
+
+tmp.sig <- deseq2.res[!is.na(deseq2.res$padj) & deseq2.res$padj <= 0.05, ]
+points(tmp.sig$baseMean, tmp.sig$log2FoldChange, pch=20, cex=0.45, col="chartreuse")
+# 2 FC lines
+abline(h=c(-1,1), col="blue")
+
+#Get normalized counts and plot PCA
+rld <- rlog(deseq2.dds)
+plotPCA(rld, intgroup=c("condition", "type"))
+
+counts2_cpm <- counts(deseq2.dds, normalized = TRUE)
+
+sig_counts <- deseq_normcounts[c("11617", "445", "6418","6943", "791", "958"), ]
+
