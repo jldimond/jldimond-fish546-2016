@@ -145,8 +145,23 @@ for (i in 1:26){
   plot(resid_all[,i])
 }
 
+########################################################
+#Read in sample info
+sinfo <- read.table("sample_info.txt", colClasses = 'character', header = FALSE)
+#without sample 101
+sinfo2 <- sinfo[2:27,]
+#transpose
+tsinfo <- t(sinfo2)
+#create vectors for morphotype and diameter (note whether sample 101
+#was included or not)
+type <- tsinfo[3,]
+diam <- tsinfo[5,]
+#without sample 112
+type2 <- tsinfo[3,c(1:9,11:26)]
+diam2 <- tsinfo[5,c(1:9,11:26)]
+depth <- tsinfo[2,c(1:9,11:26)]
 
-
+########################################################
 #MDS
 resid_t <- t(resid_all)
 d <- dist(resid_t) # euclidean distances between the rows
@@ -154,7 +169,12 @@ fit <- cmdscale(d,eig=TRUE, k=2)
 x <- fit$points[,1]
 y <- fit$points[,2]
 plot(x, y)
-text(x, y, labels = row.names(resid_t), col = rainbow(length(diam2))[rank(diam2)], cex=.7)
+text(x, y, labels = row.names(resid_t), col = rainbow(length(diam))[rank(diam2)], cex=.7)
+
+nmds <- isoMDS(d)
+plot(nmds$points, type = "n")
+text(nmds$points, labels = row.names(resid_t))
+
 
 ########################################################
 #PCA
@@ -203,7 +223,9 @@ x <- fit$points[,1]
 y <- fit$points[,2]
 plot(x, y, xlab="Coordinate 1", ylab="Coordinate 2", 
      main="Metric  MDS",  type="n")
-text(x, y, labels = row.names(resid_t_binary), cex=.7)
+text(x, y, labels = row.names(resid_t_binary), 
+     col = rainbow(length(diam2))[rank(diam2)], cex=.7)
+
 
 ####################################################################
 #DESeq2 analysis of differentially methylated loci

@@ -18,8 +18,8 @@ write.table(data6, file = "data3-2.str", row.names = FALSE, col.names = FALSE, q
 ## data without missing values.
 
 # Read in .geno data file
-a1 <- read.table("data3.geno", colClasses = 'character', header = FALSE)
-a2 <- read.fwf("data3.geno", widths=rep(1, max(nchar(a1$V1))), colClasses = 'numeric', header=FALSE)
+a1 <- read.table("data3.u.geno", colClasses = 'character', header = FALSE)
+a2 <- read.fwf("data3.u.geno", widths=rep(1, max(nchar(a1$V1))), colClasses = 'numeric', header=FALSE)
 header <- read.delim("header_data3.txt", header=FALSE)
 names <- t(header)
 names2 <-as.vector(names)
@@ -29,12 +29,12 @@ a3 <- a2[,c(1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,24,25,26,27,2
 #Matrix with only ddr loci ***if including sample 101
 a4 <- a3[,c(1,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52)]
 #Matrix with only ddr loci ***if excluding sample 101
-a4 <- a3[,c(1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47,49,51)]
+a4 <- a3[,c(2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52)]
 #Get rid of rows with any NAs (9)
 a5 <- a4[!rowSums(a4[-c(1:2)] == 9) >= 1,]
 
 #Read in sample info
-sinfo <- read.table("data3_sample_info.txt", colClasses = 'character', header = FALSE)
+sinfo <- read.table("sample_info.txt", colClasses = 'character', header = FALSE)
 tsinfo <- t(sinfo)
 #create vectors for morphotype and diameter (note whether sample 101
 #was included or not)
@@ -54,3 +54,34 @@ text(x, y, labels = row.names(a6), col = rainbow(length(diam))[rank(diam)], cex=
 sinfo <- read.table("sample_info.txt", colClasses = 'character', header = FALSE)
 tsinfo <- t(sinfo)
 type <- tsinfo[3,]
+
+########################################################
+#PCA
+pca <- prcomp(a6)
+summary(pca)
+eig <- (pca$sdev)^2
+
+#plot
+biplot(pca)
+
+# Correlation between variables and principal components
+var_cor_func <- function(var.loadings, comp.sdev){
+  var.loadings*comp.sdev
+}
+# Variable correlation/coordinates
+loadings <- pca$rotation
+sdev <- pca$sdev
+var.coord <- var.cor <- t(apply(loadings, 1, var_cor_func, sdev))
+head(var.coord[, 1:4])
+
+# Plot the correlation circle
+a <- seq(0, 2*pi, length = 100)
+plot( cos(a), sin(a), type = 'l', col="gray",
+      xlab = "PC1",  ylab = "PC2")
+abline(h = 0, v = 0, lty = 2)
+# Add active variables
+arrows(0, 0, var.coord[, 1], var.coord[, 2], 
+       length = 0.1, angle = 15, code = 2)
+# Add labels
+text(var.coord, labels=rownames(var.coord), cex = 1, adj=1)
+
