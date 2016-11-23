@@ -10,15 +10,19 @@ data <- read.delim("data3-2.txt", header=FALSE)
 data2 <- t(sapply(seq(4,ncol(data), by=4), function(i) {
      indx <- i:(i+3)
      rowSums(data[indx[indx <= ncol(data)]])}))
+
 #The resulting file needs to be transposed and turned into a dataframe
 data3 <- as.data.frame(t(data2))
+#Add column with locus number (CHROM from .vcf file)
+locus <- data[,1]
+row.names(data3) <- locus
 #Add header names
 header <- read.delim("header_data3.txt", header=FALSE)
 names <- as.vector(t(header))
 colnames(data3) <- names
 #Select samples of interest (some have very low sample sizes)
-data4 <- data3[,c(3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,
-                  22,24,25,26,27,28,29,30,31,32,33,35,36,37,38,39,40,
+data4 <- data3[,c(3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
+                  24,25,26,27,28,29,30,31,32,33,35,36,37,38,39,40,
                   41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56)]
 
 #Remove ddr rows that have any zeros. The premise here is that zeros 
@@ -30,13 +34,13 @@ data4 <- data3[,c(3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,
 #locus was counted in the ddRAD library.
 
 data5 <- data4[apply(data4[c(1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,
-                             31,33,35,37,39,41,43,45,47,49,51)],1,
+                             31,33,35,37,39,41,43,45,47,49)],1,
                      function(z) !any(z==0)),] 
 
 
 #We may want to look at a matrix with only EpiRAd data
 data6 <- data5[,c(2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,
-                  38,40,42,44,46,48,50,52)]
+                  38,40,42,44,46,48,50)]
 
 #################################################################
 # Now use edgeR package to standardize count data by library size
@@ -84,23 +88,22 @@ lm108 <- lm(counts2_cpm[,12] ~ counts2_cpm[,11])
 lm109 <- lm(counts2_cpm[,14] ~ counts2_cpm[,13])
 lm110 <- lm(counts2_cpm[,16] ~ counts2_cpm[,15])
 lm111 <- lm(counts2_cpm[,18] ~ counts2_cpm[,17])
-lm112 <- lm(counts2_cpm[,20] ~ counts2_cpm[,19])
-lm114 <- lm(counts2_cpm[,22] ~ counts2_cpm[,21])
-lm115 <- lm(counts2_cpm[,24] ~ counts2_cpm[,23])
-lm116 <- lm(counts2_cpm[,26] ~ counts2_cpm[,25])
-lm117 <- lm(counts2_cpm[,28] ~ counts2_cpm[,27])
-lm118 <- lm(counts2_cpm[,30] ~ counts2_cpm[,29])
-lm121 <- lm(counts2_cpm[,32] ~ counts2_cpm[,31])
-lm122 <- lm(counts2_cpm[,34] ~ counts2_cpm[,33])
-lm123 <- lm(counts2_cpm[,36] ~ counts2_cpm[,35])
-lm124 <- lm(counts2_cpm[,38] ~ counts2_cpm[,37])
-lm125 <- lm(counts2_cpm[,40] ~ counts2_cpm[,39])
-lm126 <- lm(counts2_cpm[,42] ~ counts2_cpm[,41])
-lm127 <- lm(counts2_cpm[,44] ~ counts2_cpm[,43])
-lm128 <- lm(counts2_cpm[,46] ~ counts2_cpm[,45])
-lm129 <- lm(counts2_cpm[,48] ~ counts2_cpm[,47])
-lm130 <- lm(counts2_cpm[,50] ~ counts2_cpm[,49])
-lm131 <- lm(counts2_cpm[,52] ~ counts2_cpm[,51])
+lm114 <- lm(counts2_cpm[,20] ~ counts2_cpm[,19])
+lm115 <- lm(counts2_cpm[,22] ~ counts2_cpm[,21])
+lm116 <- lm(counts2_cpm[,24] ~ counts2_cpm[,23])
+lm117 <- lm(counts2_cpm[,26] ~ counts2_cpm[,25])
+lm118 <- lm(counts2_cpm[,28] ~ counts2_cpm[,27])
+lm121 <- lm(counts2_cpm[,30] ~ counts2_cpm[,29])
+lm122 <- lm(counts2_cpm[,32] ~ counts2_cpm[,31])
+lm123 <- lm(counts2_cpm[,34] ~ counts2_cpm[,33])
+lm124 <- lm(counts2_cpm[,36] ~ counts2_cpm[,35])
+lm125 <- lm(counts2_cpm[,38] ~ counts2_cpm[,37])
+lm126 <- lm(counts2_cpm[,40] ~ counts2_cpm[,39])
+lm127 <- lm(counts2_cpm[,42] ~ counts2_cpm[,41])
+lm128 <- lm(counts2_cpm[,44] ~ counts2_cpm[,43])
+lm129 <- lm(counts2_cpm[,46] ~ counts2_cpm[,45])
+lm130 <- lm(counts2_cpm[,48] ~ counts2_cpm[,47])
+lm131 <- lm(counts2_cpm[,50] ~ counts2_cpm[,49])
 
 resid103 <- residuals(lm103)
 resid104 <- residuals(lm104)
@@ -111,7 +114,6 @@ resid108 <- residuals(lm108)
 resid109 <- residuals(lm109)
 resid110 <- residuals(lm110)
 resid111 <- residuals(lm111)
-resid112 <- residuals(lm112)
 resid114 <- residuals(lm114)
 resid115 <- residuals(lm115)
 resid116 <- residuals(lm116)
@@ -131,7 +133,7 @@ resid131 <- residuals(lm131)
 
 
 resid_all <- cbind(resid103, resid104, resid105, resid106, resid107, resid108,
-                   resid109, resid110, resid111, resid112, resid114, resid115,
+                   resid109, resid110, resid111, resid114, resid115,
                    resid116, resid117, resid118, resid121, resid122, resid123,
                    resid124, resid125, resid126, resid127, resid128, resid129,
                    resid130, resid131)
@@ -141,25 +143,21 @@ par(mfrow = c(7, 4))
 par(mar = c(2,2,2,2)) 
 par(oma = c(2,2,1,1)) 
 
-for (i in 1:26){
+for (i in 1:25){
   plot(resid_all[,i])
 }
 
 ########################################################
 #Read in sample info
 sinfo <- read.table("sample_info.txt", colClasses = 'character', header = FALSE)
-#without sample 101
-sinfo2 <- sinfo[2:27,]
+#without sample 101 and 112
+sinfo2 <- sinfo[c(2:10,12:27),]
 #transpose
 tsinfo <- t(sinfo2)
 #create vectors for morphotype and diameter (note whether sample 101
 #was included or not)
 type <- tsinfo[3,]
 diam <- tsinfo[5,]
-#without sample 112
-type2 <- tsinfo[3,c(1:9,11:26)]
-diam2 <- tsinfo[5,c(1:9,11:26)]
-depth <- tsinfo[2,c(1:9,11:26)]
 
 ########################################################
 #MDS
@@ -168,12 +166,22 @@ d <- dist(resid_t) # euclidean distances between the rows
 fit <- cmdscale(d,eig=TRUE, k=2)
 x <- fit$points[,1]
 y <- fit$points[,2]
-plot(x, y)
-text(x, y, labels = row.names(resid_t), col = rainbow(length(diam))[rank(diam2)], cex=.7)
 
-nmds <- isoMDS(d)
-plot(nmds$points, type = "n")
-text(nmds$points, labels = row.names(resid_t))
+#This adds a vector of color values based on the diam values
+data_seq = seq(min(as.numeric(diam)), max(as.numeric(diam)), length=25)
+col_pal = colorRampPalette(c('blue', 'green', 'red'))(25+1)
+cols = col_pal[ cut(as.numeric(diam), data_seq, include.lowest=T) ]
+
+
+layout(matrix(1:2,ncol=2), width = c(3,1),height = c(1,1))
+plot(x, y, xlab="Coordinate 1", ylab="Coordinate 2", 
+     main="Metric  MDS",  type="n")
+points(x,y, col = cols, pch = 19)
+
+legend_image <- as.raster(matrix(sort(cols, decreasing = TRUE), ncol=1))
+plot(c(0,2),c(0,1),type = 'n', axes = F,xlab = '', ylab = '', main = 'legend title')
+text(x=1.5, y = seq(0,1,l=5), labels = seq(6,26,l=5))
+rasterImage(legend_image, 0, 0, 1,1)
 
 
 ########################################################
@@ -214,17 +222,84 @@ resid_all_binary <- ifelse(resid_all<=-1, 1, 0)
 #proportion of methylated cutsites
 prop_methyl <- colSums(resid_all_binary) / nrow(resid_all_binary)
 barplot(prop_methyl)
+dens <- density(prop_methyl)
+plot(dens)
+
+#Get only rows that are differentially methylated
+resid1 <- resid_all_binary[rowSums(resid_all_binary) < 25, ]
+resid2 <- resid1[rowSums(resid1) >= 1, ]
 
 #MDS
-resid_t_binary <- t(resid_all_binary)
+resid_t_binary <- t(resid2)
 d <- dist(resid_t_binary) # euclidean distances between the rows
 fit <- cmdscale(d,eig=TRUE, k=2)
 x <- fit$points[,1]
 y <- fit$points[,2]
 plot(x, y, xlab="Coordinate 1", ylab="Coordinate 2", 
      main="Metric  MDS",  type="n")
+#This adds a column of color values
+# based on the y values
+data_seq = seq(min(as.numeric(diam)), max(as.numeric(diam)), length=25)
+col_pal = colorRampPalette(c('blue', 'green', 'red'))(25+1)
+cols = col_pal[ cut(as.numeric(diam), data_seq, include.lowest=T) ]
 text(x, y, labels = row.names(resid_t_binary), 
-     col = rainbow(length(diam2))[rank(diam2)], cex=.7)
+     col = cols, cex=.7)
+points(x,y, col = cols, pch = 19)
+
+
+layout(matrix(1:2,ncol=2), width = c(3,1),height = c(1,1))
+plot(x, y, xlab="Coordinate 1", ylab="Coordinate 2", 
+         main="Metric  MDS",  type="n")
+points(x,y, col = cols, pch = 19)
+
+legend_image <- as.raster(matrix(sort(cols, decreasing = TRUE), ncol=1))
+plot(c(0,2),c(0,1),type = 'n', axes = F,xlab = '', ylab = '', main = 'legend title')
+text(x=1.5, y = seq(0,1,l=5), labels = seq(6,26,l=5))
+rasterImage(legend_image, 0, 0, 1,1)
+
+plot(y, as.numeric(diam))
+
+#heatmap
+
+heatmap(resid_t_binary, scale = "none")
+
+####################################################################
+#DAPC using adegenet
+
+library("adegenet")
+library("ade4")
+
+#Find optimal number of clusters irrespective of species id
+#In this case, best to retain all PCs
+groups <- find.clusters(resid_t_binary, max.n.clust=24)
+
+#Cross validation to determine number of PCs to retain
+xval <- xvalDapc(resid_t_binary, type, n.pca.max = 24, training.set = 0.9,
+                 result = "groupMean", center = TRUE, scale = FALSE,
+                 n.pca = NULL, n.rep = 100, xval.plot = TRUE)
+
+#show max number of PCs to retain
+xval[2:6]
+
+#perform dapc using groups defined above group (groups$grp)
+dapc1 <- dapc(resid_t_binary, grp = type)
+scatter(dapc1)
+
+compoplot(dapc1, posi="bottomright",
+          txt.leg=paste("Cluster", 1:2), lab="",
+          ncol=1, xlab="individuals", col=funky(2), 
+          label.inds = TRUE)
+
+#perform dapc using coral type as group (grp)
+dapc1 <- dapc(a6, grp = type[2:27])
+scatter(dapc1)
+
+
+
+#look at loadings
+set.seed(4)
+contrib <- loadingplot(dapc1$var.contr, axis=1, 
+                       thres=.015, lab.jitter=1)
 
 
 ####################################################################
