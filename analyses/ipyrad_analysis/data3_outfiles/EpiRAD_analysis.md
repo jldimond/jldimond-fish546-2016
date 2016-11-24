@@ -1,18 +1,16 @@
 EpiRAD analysis
 ================
 
-This script reads in a text file derived from the "Base Counts" .vcf output from ipyrad. Base counts are used for analysis of EpiRADseq data.
-=============================================================================================================================================
+This script reads in a text file derived from the "Base Counts" .vcf output from ipyrad. Base counts (read counts) are used for analysis of EpiRADseq data.
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Read in data file
------------------
 
 ``` r
 data <- read.delim("data3-2.txt", header=FALSE)
 ```
 
 Since the base counts were split into four columns, these need to be summed.
-----------------------------------------------------------------------------
 
 ``` r
 data2 <- t(sapply(seq(4,ncol(data), by=4), function(i) {
@@ -21,7 +19,6 @@ data2 <- t(sapply(seq(4,ncol(data), by=4), function(i) {
 ```
 
 The resulting file needs to be transposed and turned into a dataframe.
-----------------------------------------------------------------------
 
 ``` r
 data3 <- as.data.frame(t(data2))
@@ -35,7 +32,6 @@ colnames(data3) <- names
 ```
 
 Select samples of interest (some have very low sample sizes)
-------------------------------------------------------------
 
 ``` r
 data4 <- data3[,c(3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
@@ -44,7 +40,6 @@ data4 <- data3[,c(3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
 ```
 
 Remove ddr rows that have any zeros. The premise here is that zeros in the EpiRAD dataset are informative because they may reflect methylation, but they could also relfect true absence of the locus in the library. Here the ddRAD library serves to standarize the EpiRAD library. Any zeros in the ddRAD libary are treated as absence of the locus, thereby leaving zeros in the EpiRAD library only where the locus was counted in the ddRAD library.
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ``` r
 data5 <- data4[apply(data4[c(1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,
@@ -53,7 +48,6 @@ data5 <- data4[apply(data4[c(1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,
 ```
 
 Use edgeR package to standardize count data by library size
-===========================================================
 
 ``` r
 library("edgeR")
@@ -183,108 +177,48 @@ counts2_cpm <- cpm(counts2, normalized.lib.sizes=TRUE, log=TRUE)
 ```
 
 Plots to show ddRAD vs EpiRAD library (before normalization)
-------------------------------------------------------------
 
 ``` r
-par(mfrow = c(7, 4))
-par(mar = c(2,2,2,2)) 
-par(oma = c(2,2,1,1)) 
+par(mfrow = c(5, 5))
+par(mar = c(2, 2 ,2 ,2), oma = c(4, 4, 0.5, 0.5))
 
-for (i in seq(1,50, by = 2)){
-  plot(data5[,i], data5[,i+1], xlab= colnames(data5[,i]), 
-  ylab= colnames(data5[,i+1]))
+for (i in seq(1,49, by = 2)){
+  plot(data5[,i], data5[,i+1], main = colnames(data5[i]))
 }
 ```
 
 ![](EpiRAD_analysis_files/figure-markdown_github/unnamed-chunk-7-1.png)<!-- -->
 
 Plot normalized counts
-----------------------
 
 ``` r
-par(mfrow = c(7, 4))
-par(mar = c(2,2,2,2)) 
-par(oma = c(2,2,1,1)) 
+par(mfrow = c(5, 5))
+par(mar = c(2, 2 ,2 ,2), oma = c(4, 4, 0.5, 0.5)) 
 
-for (i in seq(1,50, by = 2)){
-  plot(counts2_cpm[,i], counts2_cpm[,i+1], xlab= colnames(counts2_cpm[,i]), 
-       ylab= colnames(counts2_cpm[,i+1]))
+for (i in seq(1,49, by = 2)){
+  plot(counts2_cpm[,i], counts2_cpm[,i+1], main = colnames(counts2_cpm[i]))
 }
 ```
 
 ![](EpiRAD_analysis_files/figure-markdown_github/unnamed-chunk-8-1.png)<!-- -->
 
 Using lm to get residuals
-=========================
 
 ``` r
-lm103 <- lm(counts2_cpm[,2] ~ counts2_cpm[,1])
-lm104 <- lm(counts2_cpm[,4] ~ counts2_cpm[,3])
-lm105 <- lm(counts2_cpm[,6] ~ counts2_cpm[,5])
-lm106 <- lm(counts2_cpm[,8] ~ counts2_cpm[,7])
-lm107 <- lm(counts2_cpm[,10] ~ counts2_cpm[,9])
-lm108 <- lm(counts2_cpm[,12] ~ counts2_cpm[,11])
-lm109 <- lm(counts2_cpm[,14] ~ counts2_cpm[,13])
-lm110 <- lm(counts2_cpm[,16] ~ counts2_cpm[,15])
-lm111 <- lm(counts2_cpm[,18] ~ counts2_cpm[,17])
-lm114 <- lm(counts2_cpm[,20] ~ counts2_cpm[,19])
-lm115 <- lm(counts2_cpm[,22] ~ counts2_cpm[,21])
-lm116 <- lm(counts2_cpm[,24] ~ counts2_cpm[,23])
-lm117 <- lm(counts2_cpm[,26] ~ counts2_cpm[,25])
-lm118 <- lm(counts2_cpm[,28] ~ counts2_cpm[,27])
-lm121 <- lm(counts2_cpm[,30] ~ counts2_cpm[,29])
-lm122 <- lm(counts2_cpm[,32] ~ counts2_cpm[,31])
-lm123 <- lm(counts2_cpm[,34] ~ counts2_cpm[,33])
-lm124 <- lm(counts2_cpm[,36] ~ counts2_cpm[,35])
-lm125 <- lm(counts2_cpm[,38] ~ counts2_cpm[,37])
-lm126 <- lm(counts2_cpm[,40] ~ counts2_cpm[,39])
-lm127 <- lm(counts2_cpm[,42] ~ counts2_cpm[,41])
-lm128 <- lm(counts2_cpm[,44] ~ counts2_cpm[,43])
-lm129 <- lm(counts2_cpm[,46] ~ counts2_cpm[,45])
-lm130 <- lm(counts2_cpm[,48] ~ counts2_cpm[,47])
-lm131 <- lm(counts2_cpm[,50] ~ counts2_cpm[,49])
+models <- list()
+for (i in seq(1,49, by = 2)){
+  models[[colnames(counts2_cpm)[i]]] <- lm(counts2_cpm[,i+1] ~ counts2_cpm[,i])
+}
 
-resid103 <- residuals(lm103)
-resid104 <- residuals(lm104)
-resid105 <- residuals(lm105)
-resid106 <- residuals(lm106)
-resid107 <- residuals(lm107)
-resid108 <- residuals(lm108)
-resid109 <- residuals(lm109)
-resid110 <- residuals(lm110)
-resid111 <- residuals(lm111)
-resid114 <- residuals(lm114)
-resid115 <- residuals(lm115)
-resid116 <- residuals(lm116)
-resid117 <- residuals(lm117)
-resid118 <- residuals(lm118)
-resid121 <- residuals(lm121)
-resid122 <- residuals(lm122)
-resid123 <- residuals(lm123)
-resid124 <- residuals(lm124)
-resid125 <- residuals(lm125)
-resid126 <- residuals(lm126)
-resid127 <- residuals(lm127)
-resid128 <- residuals(lm128)
-resid129 <- residuals(lm129)
-resid130 <- residuals(lm130)
-resid131 <- residuals(lm131)
-
-
-resid_all <- cbind(resid103, resid104, resid105, resid106, resid107, resid108,
-                   resid109, resid110, resid111, resid114, resid115,
-                   resid116, resid117, resid118, resid121, resid122, resid123,
-                   resid124, resid125, resid126, resid127, resid128, resid129,
-                   resid130, resid131)
+residuals <- lapply(models, '[[', 2)
+resid_all <- as.data.frame(residuals)  
 ```
 
 Plot residuals
---------------
 
 ``` r
-par(mfrow = c(7, 4))
-par(mar = c(2,2,2,2)) 
-par(oma = c(2,2,1,1)) 
+par(mfrow = c(5, 5))
+par(mar = c(2, 2 ,2 ,2), oma = c(4, 4, 0.5, 0.5)) 
 
 for (i in 1:25){
   plot(resid_all[,i])
@@ -294,7 +228,6 @@ for (i in 1:25){
 ![](EpiRAD_analysis_files/figure-markdown_github/unnamed-chunk-10-1.png)<!-- -->
 
 Read in sample info
--------------------
 
 ``` r
 sinfo <- read.table("sample_info.txt", colClasses = 'character', header = FALSE)
@@ -326,9 +259,9 @@ This adds a vector of color values based on the diam values
 data_seq = seq(min(as.numeric(diam)), max(as.numeric(diam)), length=25)
 col_pal = colorRampPalette(c('blue', 'green', 'red'))(25+1)
 cols = col_pal[ cut(as.numeric(diam), data_seq, include.lowest=T) ]
-
-##Plot it
 ```
+
+Plot it
 
 ``` r
 layout(matrix(1:2,ncol=2), width = c(3,1),height = c(1,1))
@@ -337,7 +270,7 @@ plot(x, y, xlab="Coordinate 1", ylab="Coordinate 2",
 points(x,y, col = cols, pch = 19)
 
 legend_image <- as.raster(matrix(sort(cols, decreasing = TRUE), ncol=1))
-plot(c(0,2),c(0,1),type = 'n', axes = F,xlab = '', ylab = '', main = 'legend title')
+plot(c(0,2),c(0,1),type = 'n', axes = F,xlab = '', ylab = '', main = 'branch diameter')
 text(x=1.5, y = seq(0,1,l=5), labels = seq(6,26,l=5))
 rasterImage(legend_image, 0, 0, 1,1)
 ```
@@ -345,7 +278,6 @@ rasterImage(legend_image, 0, 0, 1,1)
 ![](EpiRAD_analysis_files/figure-markdown_github/unnamed-chunk-14-1.png)<!-- -->
 
 PCA
-===
 
 ``` r
 pca <- prcomp(resid_t)
@@ -390,14 +322,12 @@ biplot(pca)
 ![](EpiRAD_analysis_files/figure-markdown_github/unnamed-chunk-15-1.png)<!-- -->
 
 Make binary dataset based on residuals \<=-1
-============================================
 
 ``` r
 resid_all_binary <- ifelse(resid_all<=-1, 1, 0)
 ```
 
 Proportion of methylated cutsites
----------------------------------
 
 ``` r
 prop_methyl <- colSums(resid_all_binary) / nrow(resid_all_binary)
@@ -408,15 +338,13 @@ plot(dens)
 ![](EpiRAD_analysis_files/figure-markdown_github/unnamed-chunk-17-1.png)<!-- -->
 
 Get only rows that are differentially methylated
-------------------------------------------------
 
 ``` r
 resid1 <- resid_all_binary[rowSums(resid_all_binary) < 25, ]
 resid2 <- resid1[rowSums(resid1) >= 1, ]
 ```
 
-MDS
-===
+MDS with binary (mehtylated vs unmethylated) data
 
 ``` r
 resid_t_binary <- t(resid2)
@@ -430,17 +358,15 @@ plot(x, y, xlab="Coordinate 1", ylab="Coordinate 2",
 
 ![](EpiRAD_analysis_files/figure-markdown_github/unnamed-chunk-19-1.png)<!-- -->
 
-``` r
-##This adds a column of color valuesbased on the y values
-```
+This adds a column of color values based on the y values
 
 ``` r
 data_seq = seq(min(as.numeric(diam)), max(as.numeric(diam)), length=25)
 col_pal = colorRampPalette(c('blue', 'green', 'red'))(25+1)
 cols = col_pal[ cut(as.numeric(diam), data_seq, include.lowest=T) ]
-
-##Plot
 ```
+
+Plot
 
 ``` r
 layout(matrix(1:2,ncol=2), width = c(3,1),height = c(1,1))
@@ -456,8 +382,7 @@ rasterImage(legend_image, 0, 0, 1,1)
 
 ![](EpiRAD_analysis_files/figure-markdown_github/unnamed-chunk-21-1.png)<!-- -->
 
-heatmap
-=======
+Heatmap of binary data
 
 ``` r
 heatmap(resid_t_binary, scale = "none")

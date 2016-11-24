@@ -38,10 +38,6 @@ data5 <- data4[apply(data4[c(1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,
                      function(z) !any(z==0)),] 
 
 
-#We may want to look at a matrix with only EpiRAd data
-data6 <- data5[,c(2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,
-                  38,40,42,44,46,48,50)]
-
 #################################################################
 # Now use edgeR package to standardize count data by library size
 
@@ -56,92 +52,36 @@ counts2$samples
 counts2_cpm <- cpm(counts2, normalized.lib.sizes=TRUE, log=TRUE)
 
 ##Plots to show ddRAD vs EpiRAD library (before normalization)
-par(mfrow = c(7, 4))
-par(mar = c(2,2,2,2)) 
-par(oma = c(2,2,1,1)) 
+par(mfrow = c(5, 5))
+par(mar = c(2, ,2 ,2 ,2), oma = c(4, 4, 0.5, 0.5))
 
-for (i in seq(1,51, by = 2)){
-  plot(data5[,i], data5[,i+1], xlab= colnames(data5[,i]), 
-  ylab= colnames(data5[,i+1]))
+for (i in seq(1,49, by = 2)){
+  plot(data5[,i], data5[,i+1], main = colnames(data5[i]))
 }
 
 
 #plot normalized counts
-par(mfrow = c(7, 4))
-par(mar = c(2,2,2,2)) 
-par(oma = c(2,2,1,1)) 
+par(mfrow = c(5, 5))
+par(mar = c(2, ,2 ,2 ,2), oma = c(4, 4, 0.5, 0.5)) 
 
-for (i in seq(1,51, by = 2)){
-  plot(counts2_cpm[,i], counts2_cpm[,i+1], xlab= colnames(counts2_cpm[,i]), 
-       ylab= colnames(counts2_cpm[,i+1]))
+for (i in seq(1,49, by = 2)){
+  plot(counts2_cpm[,i], counts2_cpm[,i+1], main = colnames(counts2_cpm[i]))
 }
 
 ##################################################################
 #Using lm to get residuals
 
-lm103 <- lm(counts2_cpm[,2] ~ counts2_cpm[,1])
-lm104 <- lm(counts2_cpm[,4] ~ counts2_cpm[,3])
-lm105 <- lm(counts2_cpm[,6] ~ counts2_cpm[,5])
-lm106 <- lm(counts2_cpm[,8] ~ counts2_cpm[,7])
-lm107 <- lm(counts2_cpm[,10] ~ counts2_cpm[,9])
-lm108 <- lm(counts2_cpm[,12] ~ counts2_cpm[,11])
-lm109 <- lm(counts2_cpm[,14] ~ counts2_cpm[,13])
-lm110 <- lm(counts2_cpm[,16] ~ counts2_cpm[,15])
-lm111 <- lm(counts2_cpm[,18] ~ counts2_cpm[,17])
-lm114 <- lm(counts2_cpm[,20] ~ counts2_cpm[,19])
-lm115 <- lm(counts2_cpm[,22] ~ counts2_cpm[,21])
-lm116 <- lm(counts2_cpm[,24] ~ counts2_cpm[,23])
-lm117 <- lm(counts2_cpm[,26] ~ counts2_cpm[,25])
-lm118 <- lm(counts2_cpm[,28] ~ counts2_cpm[,27])
-lm121 <- lm(counts2_cpm[,30] ~ counts2_cpm[,29])
-lm122 <- lm(counts2_cpm[,32] ~ counts2_cpm[,31])
-lm123 <- lm(counts2_cpm[,34] ~ counts2_cpm[,33])
-lm124 <- lm(counts2_cpm[,36] ~ counts2_cpm[,35])
-lm125 <- lm(counts2_cpm[,38] ~ counts2_cpm[,37])
-lm126 <- lm(counts2_cpm[,40] ~ counts2_cpm[,39])
-lm127 <- lm(counts2_cpm[,42] ~ counts2_cpm[,41])
-lm128 <- lm(counts2_cpm[,44] ~ counts2_cpm[,43])
-lm129 <- lm(counts2_cpm[,46] ~ counts2_cpm[,45])
-lm130 <- lm(counts2_cpm[,48] ~ counts2_cpm[,47])
-lm131 <- lm(counts2_cpm[,50] ~ counts2_cpm[,49])
+models <- list()
+for (i in seq(1,49, by = 2)){
+  models[[colnames(counts2_cpm)[i]]] <- lm(counts2_cpm[,i+1] ~ counts2_cpm[,i])
+}
 
-resid103 <- residuals(lm103)
-resid104 <- residuals(lm104)
-resid105 <- residuals(lm105)
-resid106 <- residuals(lm106)
-resid107 <- residuals(lm107)
-resid108 <- residuals(lm108)
-resid109 <- residuals(lm109)
-resid110 <- residuals(lm110)
-resid111 <- residuals(lm111)
-resid114 <- residuals(lm114)
-resid115 <- residuals(lm115)
-resid116 <- residuals(lm116)
-resid117 <- residuals(lm117)
-resid118 <- residuals(lm118)
-resid121 <- residuals(lm121)
-resid122 <- residuals(lm122)
-resid123 <- residuals(lm123)
-resid124 <- residuals(lm124)
-resid125 <- residuals(lm125)
-resid126 <- residuals(lm126)
-resid127 <- residuals(lm127)
-resid128 <- residuals(lm128)
-resid129 <- residuals(lm129)
-resid130 <- residuals(lm130)
-resid131 <- residuals(lm131)
-
-
-resid_all <- cbind(resid103, resid104, resid105, resid106, resid107, resid108,
-                   resid109, resid110, resid111, resid114, resid115,
-                   resid116, resid117, resid118, resid121, resid122, resid123,
-                   resid124, resid125, resid126, resid127, resid128, resid129,
-                   resid130, resid131)
+residuals <- lapply(models, '[[', 2)
+resid_all <- as.data.frame(residuals)  
 
 #plot residuals
-par(mfrow = c(7, 4))
-par(mar = c(2,2,2,2)) 
-par(oma = c(2,2,1,1)) 
+par(mfrow = c(5, 5))
+par(mar = c(2, ,2 ,2 ,2), oma = c(4, 4, 0.5, 0.5)) 
 
 for (i in 1:25){
   plot(resid_all[,i])
@@ -179,7 +119,7 @@ plot(x, y, xlab="Coordinate 1", ylab="Coordinate 2",
 points(x,y, col = cols, pch = 19)
 
 legend_image <- as.raster(matrix(sort(cols, decreasing = TRUE), ncol=1))
-plot(c(0,2),c(0,1),type = 'n', axes = F,xlab = '', ylab = '', main = 'legend title')
+plot(c(0,2),c(0,1),type = 'n', axes = F,xlab = '', ylab = '', main = 'branch diameter')
 text(x=1.5, y = seq(0,1,l=5), labels = seq(6,26,l=5))
 rasterImage(legend_image, 0, 0, 1,1)
 
@@ -253,7 +193,7 @@ plot(x, y, xlab="Coordinate 1", ylab="Coordinate 2",
 points(x,y, col = cols, pch = 19)
 
 legend_image <- as.raster(matrix(sort(cols, decreasing = TRUE), ncol=1))
-plot(c(0,2),c(0,1),type = 'n', axes = F,xlab = '', ylab = '', main = 'legend title')
+plot(c(0,2),c(0,1),type = 'n', axes = F,xlab = '', ylab = '', main = 'branch diameter')
 text(x=1.5, y = seq(0,1,l=5), labels = seq(6,26,l=5))
 rasterImage(legend_image, 0, 0, 1,1)
 
