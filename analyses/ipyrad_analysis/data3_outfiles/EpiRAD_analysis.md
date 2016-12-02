@@ -1,8 +1,8 @@
 EpiRAD analysis
 ================
 
-This script reads in a text file derived from the "Base Counts" .vcf output from ipyrad. Base counts (read counts) are used for analysis of EpiRADseq data.
------------------------------------------------------------------------------------------------------------------------------------------------------------
+This script reads in a text file derived from the .vcf output from ipyrad. Base counts (read counts) are used for analysis of EpiRADseq data. The Jupyter notebook "VCF\_readcounts.ipynb" is used to generate the file "data3-2.txt" that is used in this script.
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Read in data file
 
@@ -242,7 +242,6 @@ diam <- tsinfo[5,]
 ```
 
 MDS
-===
 
 ``` r
 resid_t <- t(resid_all)
@@ -253,7 +252,6 @@ y <- fit$points[,2]
 ```
 
 This adds a vector of color values based on the diam values
------------------------------------------------------------
 
 ``` r
 data_seq = seq(min(as.numeric(diam)), max(as.numeric(diam)), length=25)
@@ -344,7 +342,7 @@ resid1 <- resid_all_binary[rowSums(resid_all_binary) < 25, ]
 resid2 <- resid1[rowSums(resid1) >= 1, ]
 ```
 
-MDS with binary (mehtylated vs unmethylated) data
+MDS with binary (methylated vs unmethylated) data
 
 ``` r
 resid_t_binary <- t(resid2)
@@ -352,11 +350,7 @@ d <- dist(resid_t_binary) # euclidean distances between the rows
 fit <- cmdscale(d,eig=TRUE, k=2)
 x <- fit$points[,1]
 y <- fit$points[,2]
-plot(x, y, xlab="Coordinate 1", ylab="Coordinate 2", 
-     main="Metric  MDS",  type="n")
 ```
-
-![](EpiRAD_analysis_files/figure-markdown_github/unnamed-chunk-19-1.png)<!-- -->
 
 This adds a column of color values based on the y values
 
@@ -366,7 +360,7 @@ col_pal = colorRampPalette(c('blue', 'green', 'red'))(25+1)
 cols = col_pal[ cut(as.numeric(diam), data_seq, include.lowest=T) ]
 ```
 
-Plot
+Plot MDS
 
 ``` r
 layout(matrix(1:2,ncol=2), width = c(3,1),height = c(1,1))
