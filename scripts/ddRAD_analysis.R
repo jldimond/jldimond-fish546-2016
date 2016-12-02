@@ -124,3 +124,39 @@ contrib <- loadingplot(dapc1$var.contr, axis=1,
 #boxplot comparing branch diameter among groups from dapc
 diam2 <- as.numeric(sinfo[,5])
 boxplot(diam2 ~ dapc1$assign, xlab = "Group", ylab =  "diameter")
+
+#ANOVA
+#Run lm on diameter by group
+model <- lm(diam2 ~ dapc1$assign)
+#Check model (qq plot, etc)
+par(mfrow=c(2,2))
+plot(model)
+library(lmtest)
+#Breush Pagan Test for heteroscadisticity
+bptest(model)
+#Run ANOVA
+anova(model)
+#pairwise t test with bonferonni adjustment
+pairwise.t.test(diam2, dapc1$assign, p.adj = "bonf")
+
+######################################################################
+#Multiple regression
+
+#dapc with single DF
+dapc1 <- dapc(genind1, pop = groups$grp)
+#Select # pcs = 9, # df = 1
+scatter(dapc1)
+#convert DF coord to vector
+dapc1_da1 <- dapc1$ind.coord
+#replace unknown sym type NAs to "U"
+sinfo[is.na(sinfo)] <- "U"
+fit <- lm(na.omit(dapc1_da1 ~ as.numeric(sinfo$V2) + as.factor(sinfo$V4) + as.numeric(sinfo$V5)))
+library(relaimpo)
+calc.relimp(fit,type=c("lmg","last","first"),
+            rela=TRUE)
+
+# Bootstrap Measures of Relative Importance (1000 samples) 
+boot <- boot.relimp(fit, b = 1000, type = c("lmg", "last", "first"), 
+                    rank = TRUE, diff = TRUE, rela = TRUE)
+booteval.relimp(boot) # print result
+plot(booteval.relimp(boot,sort=TRUE)) # plot result
