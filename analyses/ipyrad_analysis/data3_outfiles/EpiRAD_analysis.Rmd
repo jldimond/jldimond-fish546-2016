@@ -124,7 +124,7 @@ type <- tsinfo[3,]
 diam <- tsinfo[5,]
 ```
 
-#MDS
+MDS
 
 ```{r}
 resid_t <- t(resid_all)
@@ -134,7 +134,7 @@ x <- fit$points[,1]
 y <- fit$points[,2]
 ```
 
-##This adds a vector of color values based on the diam values
+This adds a vector of color values based on the diam values
 
 ```{r}
 data_seq = seq(min(as.numeric(diam)), max(as.numeric(diam)), length=25)
