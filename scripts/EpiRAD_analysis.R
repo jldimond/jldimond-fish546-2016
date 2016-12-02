@@ -175,8 +175,7 @@ d <- dist(resid_t_binary) # euclidean distances between the rows
 fit <- cmdscale(d,eig=TRUE, k=2)
 x <- fit$points[,1]
 y <- fit$points[,2]
-plot(x, y, xlab="Coordinate 1", ylab="Coordinate 2", 
-     main="Metric  MDS",  type="n")
+
 #This adds a column of color values
 # based on the y values
 data_seq = seq(min(as.numeric(diam)), max(as.numeric(diam)), length=25)
