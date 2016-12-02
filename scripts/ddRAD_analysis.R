@@ -81,7 +81,7 @@ rasterImage(legend_image, 0, 0, 1,1)
 
 
 ####################################################################
-#DAPC using adegenet
+#DAPC (discriminant analysis of principal components) using adegenet
 
 library("adegenet")
 library("ade4")
@@ -102,21 +102,19 @@ groups <- find.clusters(genind1, max.n.clust=10, n.pca = 24,
 xval <- xvalDapc(genind1@tab, groups$grp, n.pca.max = 25, training.set = 0.9,
                  result = "groupMean", center = TRUE, scale = FALSE,
                  n.pca = NULL, n.rep = 100, xval.plot = TRUE)
-
+dev.off() 
 #show max number of PCs to retain
 xval[2:6]
 
-#perform dapc using groups defined above group (groups$grp)
+#perform dapc using groups defined above group (groups$grp). Note 
+#that n.pca and n.da can be left blank and the program will query 
+#which values to choose.
 dapc1 <- dapc(genind1, pop = groups$grp, n.pca=9, n.da=2)
-scatter(dapc1, label.inds = list(air = 0.05, pch = 0.5),
+scatter(dapc1, #label.inds = list(air = 0.1, pch = 0.5),
         posi.da = "topleft", posi.pca = "topright")
 
-compoplot(dapc1, posi="bottomright",
-          txt.leg=paste("Cluster", 1:3), lab="",
-          ncol=1, xlab="individuals", col=funky(3))
 
-
-#look at loadings
+#look at loadings of individual loci
 set.seed(4)
 contrib <- loadingplot(dapc1$var.contr, axis=1, 
                        thres=.005, lab.jitter=1)
@@ -133,27 +131,35 @@ par(mfrow=c(2,2))
 plot(model)
 library(lmtest)
 #Breush Pagan Test for heteroscadisticity
-bptest(model)
+bpt <- bptest(model)
+print(bpt)
 #Run ANOVA
-anova(model)
+aov <- anova(model)
+print(summary(aov))
 #pairwise t test with bonferonni adjustment
-pairwise.t.test(diam2, dapc1$assign, p.adj = "bonf")
+ttest <- pairwise.t.test(diam2, dapc1$assign, p.adj = "bonf")
+print(ttest)
 
 ######################################################################
-#Multiple regression
+#Multiple regression: test linear model of depth, symbiont type, and
+#branch diameter vs. dapc of SNPs using a single DA from the model above
 
 #dapc with single DF
-dapc1 <- dapc(genind1, pop = groups$grp)
+dapc1 <- dapc(genind1, pop = groups$grp, n.pca=9, n.da=1)
 #Select # pcs = 9, # df = 1
 scatter(dapc1)
 #convert DF coord to vector
 dapc1_da1 <- dapc1$ind.coord
-#replace unknown sym type NAs to "U"
+#replace unknown symbiont type NAs to "U"
 sinfo[is.na(sinfo)] <- "U"
+#fit model with water depth (sinfo$V2), branch diameter (sinfo$V5), 
+# and symbiont type (sinfo$V4) 
 fit <- lm(na.omit(dapc1_da1 ~ as.numeric(sinfo$V2) + as.factor(sinfo$V4) + as.numeric(sinfo$V5)))
+#Relative importance of different variables in model
 library(relaimpo)
-calc.relimp(fit,type=c("lmg","last","first"),
+relimp <- calc.relimp(fit,type=c("lmg","last","first"),
             rela=TRUE)
+print(relimp)
 
 # Bootstrap Measures of Relative Importance (1000 samples) 
 boot <- boot.relimp(fit, b = 1000, type = c("lmg", "last", "first"), 
